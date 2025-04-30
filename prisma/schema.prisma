@@ -1,0 +1,75 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role
+  subjects  Subject[] @relation("UserSubjects")
+  assignments Assignment[]
+  submissions Submission[]
+}
+
+enum Role {
+  STUDENT
+  LECTURER
+}
+
+model Subject {
+  id        Int      @id @default(autoincrement())
+  name      String
+  students  User[]   @relation("UserSubjects")
+  lectures  Lecture[]
+  assignments Assignment[]
+}
+
+model Lecture {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  subject   Subject  @relation(fields: [subjectId], references: [id])
+  subjectId Int
+  lecturer  User     @relation(fields: [lecturerId], references: [id])
+  lecturerId Int
+}
+
+model Assignment {
+  id         Int      @id @default(autoincrement())
+  title      String
+  description String
+  subject     Subject @relation(fields: [subjectId], references: [id])
+  subjectId   Int
+  lecturer    User    @relation(fields: [lecturerId], references: [id])
+  lecturerId  Int
+  submissions Submission[]
+  grade      Int?
+}
+
+model Submission {
+  id           Int       @id @default(autoincrement())
+  assignment   Assignment @relation(fields: [assignmentId], references: [id])
+  assignmentId Int
+  student      User      @relation(fields: [studentId], references: [id])
+  studentId    Int
+  content      String
+  grade        Int?
+}
+
+model Quiz {
+  id         Int      @id @default(autoincrement())
+  question   String
+  answer     String
+  subject    Subject  @relation(fields: [subjectId], references: [id])
+  subjectId  Int
+  lecturer   User     @relation(fields: [lecturerId], references: [id])
+  lecturerId Int
+  deadline   DateTime
+}
