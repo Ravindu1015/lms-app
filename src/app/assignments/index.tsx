@@ -1,4 +1,18 @@
 import { useSession } from "next-auth/react"
+import { Session } from "next-auth"
+
+// Extend the Session type to include user.id
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string
+      name?: string | null
+      email?: string | null
+      image?: string | null
+      role?: string | null
+    }
+  }
+}
 import { useState, useEffect } from "react"
 import axios from "axios"
 
@@ -17,14 +31,14 @@ export default function Assignments() {
 
   useEffect(() => {
     if (!session) return
-    if (session.user.role === "LECTURER") {
+    if (session?.user?.role === "LECTURER") {
       // Lecturer: fetch assignments for their subjects
-      axios.get("/api/subjects/lecturer?lecturerId=" + session.user.id).then(r => setSubjects(r.data))
-      axios.get("/api/assignments?lecturerId=" + session.user.id).then(r => setAssignments(r.data))
+      axios.get("/api/subjects/lecturer?lecturerId=" + session.user.id).then(r => setSubjects(r.data as any[]))
+      axios.get("/api/assignments?lecturerId=" + session.user.id).then(r => setAssignments(r.data as any[]))
     } else {
       // Student: fetch assignments for their subjects
-      axios.get("/api/subjects/registered?userId=" + session.user.id).then(r => setSubjects(r.data))
-      axios.get("/api/assignments?studentId=" + session.user.id).then(r => setAssignments(r.data))
+      axios.get("/api/subjects/registered?userId=" + session.user.id).then(r => setSubjects(r.data as any[]))
+      axios.get("/api/assignments?studentId=" + session.user.id).then(r => setAssignments(r.data as any[]))
     }
   }, [session])
 
@@ -35,12 +49,12 @@ export default function Assignments() {
       title, description, subjectId, lecturerId: session!.user.id
     })
     setTitle(''); setDescription('')
-    axios.get("/api/assignments?lecturerId=" + session!.user.id).then(r => setAssignments(r.data))
+    axios.get<any[]>("/api/assignments?lecturerId=" + session!.user.id).then(r => setAssignments(r.data))
   }
 
   // View submissions (lecturer)
   async function viewSubmissions(assignmentId: number) {
-    const res = await axios.get(`/api/assignments/${assignmentId}/submissions`)
+    const res = await axios.get<any[]>(`/api/assignments/${assignmentId}/submissions`)
     setSubmissions(res.data)
     setSelectedAssignment(assignments.find(a => a.id === assignmentId))
   }
