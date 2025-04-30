@@ -19,11 +19,11 @@ export default function Quizzes() {
   useEffect(() => {
     if (!session) return
     if (session.user.role === "LECTURER") {
-      axios.get("/api/subjects/lecturer?lecturerId=" + session.user.id).then(r => setSubjects(r.data))
+      axios.get("/api/subjects/lecturer?lecturerId=" + session.user.id).then(r => setSubjects(r.data as any[]))
     } else {
-      axios.get("/api/subjects/registered?userId=" + session.user.id).then(r => setSubjects(r.data))
+      axios.get("/api/subjects/registered?userId=" + session.user.id).then(r => setSubjects(r.data as any[]))
     }
-    axios.get("/api/quizzes").then(r => setQuizzes(r.data))
+    axios.get("/api/quizzes").then(r => setQuizzes(r.data as any[]))
   }, [session])
 
   // Quiz creation (lecturer)
@@ -33,7 +33,7 @@ export default function Quizzes() {
       question, answer, subjectId, lecturerId: session!.user.id, deadline
     })
     setQuestion(''); setAnswer(''); setDeadline('')
-    axios.get("/api/quizzes").then(r => setQuizzes(r.data))
+    axios.get<any[]>("/api/quizzes").then(r => setQuizzes(r.data))
   }
 
   // Start quiz attempt (student)

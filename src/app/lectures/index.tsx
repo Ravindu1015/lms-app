@@ -12,15 +12,15 @@ export default function Lectures() {
 
   useEffect(() => {
     if (!session) return
-    axios.get("/api/lectures?lecturerId=" + session.user.id).then(r => setLectures(r.data))
-    axios.get("/api/subjects/lecturer?lecturerId=" + session.user.id).then(r => setSubjects(r.data))
+    axios.get("/api/lectures?lecturerId=" + session.user.id).then(r => setLectures(r.data as any[]))
+    axios.get("/api/subjects/lecturer?lecturerId=" + session.user.id).then(r => setSubjects(r.data as any[]))
   }, [session])
 
   async function addLecture(e: React.FormEvent) {
     e.preventDefault()
     await axios.post("/api/lectures/create", { title, content, lecturerId: session!.user.id, subjectId })
     setTitle(''); setContent('')
-    axios.get("/api/lectures?lecturerId=" + session!.user.id).then(r => setLectures(r.data))
+    axios.get<any[]>("/api/lectures?lecturerId=" + session!.user.id).then(r => setLectures(r.data))
   }
 
   return (

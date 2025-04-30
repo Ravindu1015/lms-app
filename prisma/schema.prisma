@@ -73,3 +73,14 @@ model Quiz {
   lecturerId Int
   deadline   DateTime
 }
+
+model QuizSubmission {
+  id        Int    @id @default(autoincrement())
+  quiz      Quiz   @relation(fields: [quizId], references: [id])
+  quizId    Int
+  student   User   @relation(fields: [studentId], references: [id])
+  studentId Int
+  attempt   String
+  timestamp DateTime @default(now())
+}
+
