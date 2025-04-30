@@ -11,11 +11,11 @@ export default function Subjects() {
 
   useEffect(() => {
     const fetchSubjects = async () => {
-      const all = await axios.get('/api/subjects').then(r => r.data)
+      const all = await axios.get<Subject[]>('/api/subjects').then(r => r.data)
       setSubjects(all)
       if (session) {
-        const res = await axios.get(`/api/subjects/registered?userId=${session.user.id}`)
-        setRegistered(res.data.map((s: Subject) => s.id))
+        const res = await axios.get<Subject[]>(`/api/subjects/registered?userId=${session.user.id}`)
+        setRegistered(res.data.map((s) => s.id))
       }
     }
     fetchSubjects()
