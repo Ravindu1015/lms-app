@@ -7,57 +7,60 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role
-  subjects  Subject[] @relation("UserSubjects")
-  assignments Assignment[]
-  submissions Submission[]
-}
-
 enum Role {
   STUDENT
   LECTURER
 }
 
+model User {
+  id         Int            @id @default(autoincrement())
+  name       String
+  email      String         @unique
+  password   String
+  role       Role
+  subjects   Subject[]      @relation("UserSubjects")
+  assignments Assignment[]  // Assignments created by lecturer
+  submissions Submission[]  // Assignments submitted by student
+  quizzesCreated Quiz[]     @relation("UserQuizLecturer") // <-- Required!
+  quizzes    QuizSubmission[]
+  lectures   Lecture[]      @relation("LecturerLectures")
+}
+
 model Subject {
-  id        Int      @id @default(autoincrement())
-  name      String
-  students  User[]   @relation("UserSubjects")
-  lectures  Lecture[]
+  id          Int         @id @default(autoincrement())
+  name        String
+  students    User[]      @relation("UserSubjects")
+  lectures    Lecture[]
   assignments Assignment[]
+  quizzes     Quiz[]
 }
 
 model Lecture {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String
-  subject   Subject  @relation(fields: [subjectId], references: [id])
-  subjectId Int
-  lecturer  User     @relation(fields: [lecturerId], references: [id])
+  id         Int      @id @default(autoincrement())
+  title      String
+  content    String
+  subject    Subject  @relation(fields: [subjectId], references: [id])
+  subjectId  Int
+  lecturer   User     @relation("LecturerLectures", fields: [lecturerId], references: [id])
   lecturerId Int
 }
 
 model Assignment {
-  id         Int      @id @default(autoincrement())
-  title      String
-  description String
-  subject     Subject @relation(fields: [subjectId], references: [id])
-  subjectId   Int
-  lecturer    User    @relation(fields: [lecturerId], references: [id])
-  lecturerId  Int
-  submissions Submission[]
-  grade      Int?
+  id           Int           @id @default(autoincrement())
+  title        String
+  description  String
+  subject      Subject       @relation(fields: [subjectId], references: [id])
+  subjectId    Int
+  lecturer     User          @relation(fields: [lecturerId], references: [id])
+  lecturerId   Int
+  submissions  Submission[]
 }
 
 model Submission {
-  id           Int       @id @default(autoincrement())
-  assignment   Assignment @relation(fields: [assignmentId], references: [id])
+  id           Int           @id @default(autoincrement())
+  assignment   Assignment    @relation(fields: [assignmentId], references: [id])
   assignmentId Int
-  student      User      @relation(fields: [studentId], references: [id])
+  student      User          @relation(fields: [studentId], references: [id])
   studentId    Int
   content      String
   grade        Int?
@@ -69,18 +72,18 @@ model Quiz {
   answer     String
   subject    Subject  @relation(fields: [subjectId], references: [id])
   subjectId  Int
-  lecturer   User     @relation(fields: [lecturerId], references: [id])
+  lecturer   User     @relation("UserQuizLecturer", fields: [lecturerId], references: [id])
   lecturerId Int
   deadline   DateTime
+  submissions QuizSubmission[]
 }
 
 model QuizSubmission {
-  id        Int    @id @default(autoincrement())
-  quiz      Quiz   @relation(fields: [quizId], references: [id])
+  id        Int      @id @default(autoincrement())
+  quiz      Quiz     @relation(fields: [quizId], references: [id])
   quizId    Int
-  student   User   @relation(fields: [studentId], references: [id])
+  student   User     @relation(fields: [studentId], references: [id])
   studentId Int
   attempt   String
   timestamp DateTime @default(now())
 }
-
